@@ -1,0 +1,55 @@
+##############################################################################
+# Role: download_packages - START
+##############################################################################
+
+# packages_to_download - list of package to download, defined by url and service name
+#
+packages_to_download:
+  - pkg_url: https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
+    pkg_ext: tar.gz
+    svc_name: node_exporter
+    svc_binary: node_exporter
+  - pkg_url: https://github.com/ncabatoff/process-exporter/releases/download/v0.6.0/process-exporter-0.6.0.linux-amd64.tar.gz
+    pkg_ext: tar.gz
+    svc_name: process_exporter
+    svc_binary: process-exporter
+    svc_config: process_exporter.yml
+  - pkg_url: http://packages.psychotic.ninja/7/base/x86_64/RPMS/stress-1.0.4-14.el7.psychotic.x86_64.rpm
+    pkg_ext: rpm
+    svc_name: stress
+  - pkg_ext: py
+    svc_name: stress_generator
+    svc_binary: stress_generator.py
+
+# svc_unit_location - location of service unit file
+# svc_binary_location - location of service binaries
+# pkg_dest - destination folder for download
+svc_unit_location: /etc/systemd/system
+svc_binary_location: /usr/share
+pkg_dest: /home/vagrant/temp
+
+##############################################################################
+# Role: download_packages - END
+##############################################################################
+
+
+
+##############################################################################
+# Role: setup_dns - START
+# Also used in: setup_docker, setup_email_server
+##############################################################################
+
+# Various parameters needed for setting DNS server
+zone_name: "{{ hostvars['monitor']['zone_name'] }}"
+monitor_ip: "{{ hostvars['monitor']['ansible_host'] }}"
+monitor_last_octet: "{{ hostvars['monitor']['last_octet'] }}"
+srv1_ip: "{{ hostvars['srv1']['ansible_host'] }}"
+srv1_last_octet: "{{ hostvars['srv1']['last_octet'] }}"
+srv2_ip: "{{ hostvars['srv2']['ansible_host'] }}"
+srv2_last_octet: "{{ hostvars['srv2']['last_octet'] }}"
+subnet_root: "{{ hostvars['monitor']['subnet_root'] }}"
+subnet_root_inverted: "{{ hostvars['monitor']['subnet_root_inverted'] }}"
+
+##############################################################################
+# Role: setup_dns - END
+##############################################################################

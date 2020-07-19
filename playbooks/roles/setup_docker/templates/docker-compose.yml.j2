@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+{% for svc in docker_svcs %}
+  {{ svc.name }}:
+    image: {{ svc.image }}
+    container_name: {{ svc.container_name }}
+    ports:
+{% for port in svc.ports %}
+      - {{ port }}
+{% endfor %}
+    networks:
+      - promon
+{% if svc.depends_on is defined %}
+    depends_on:
+{% for dependant in svc.depends_on %}
+      - {{ dependant }}
+{% endfor %}
+{% endif %}
+{% if svc.volumes is defined %}
+    volumes:
+{% for volume in svc.volumes %}
+      - {{ volume }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+networks:
+  promon:
+    driver: bridge

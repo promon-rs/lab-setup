@@ -1,0 +1,7 @@
+process_names:
+  - exe:
+{% for svc in packages_to_download %}
+{% if svc.svc_binary is defined %}
+    - {{ svc_binary_location }}/{{ svc.svc_name }}/{{ svc.svc_binary }}
+{% endif %}
+{% endfor %}

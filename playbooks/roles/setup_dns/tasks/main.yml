@@ -1,0 +1,57 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Setup DNS server
+- name: Template /etc/named.conf
+  template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Template /var/named/{{ zone_name }}.db
+  template:
+    src: zone.db.j2
+    dest: "/var/named/{{ zone_name }}.db"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Template /var/named/{{ subnet_root }}.db
+  template:
+    src: reverse.db.j2
+    dest: "/var/named/{{ subnet_root }}.db"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart named service
+  service:
+    name: named
+    state: started
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

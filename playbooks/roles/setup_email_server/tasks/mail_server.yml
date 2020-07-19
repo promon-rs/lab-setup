@@ -1,0 +1,89 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Forward item to be written in a file
+- name: Setting postfix and dovecot - lines
+  include_tasks: write_to_a_file.yml
+  vars:
+    to_write: "{{ item }}"
+    type: line
+  with_items: "{{ lines_in_file }}"
+
+- name: Setting postfix and dovecot - blocks
+  include_tasks: write_to_a_file.yml
+  vars:
+    to_write: "{{ item }}"
+    type: block
+  with_items: "{{ blocks_in_file }}"
+
+# Templating config files
+- name: Templating config files
+  template:
+    src: 15-mailboxes.conf.j2
+    dest: /etc/dovecot/conf.d/15-mailboxes.conf
+
+# Add user dovecot to group mail
+- name: Add user dovecot to group mail
+  user:
+    name: dovecot
+    group: mail
+    append: yes
+
+# Set permissions
+- name: Set permissions to /var/mail/*
+  shell: sudo chown 0600 /var/mail/*
+
+# Set SELinux to permissive
+- name: Set SELinux to permissive
+  selinux:
+    policy: targeted
+    state: permissive
+
+# Restart postfix and dovecot services
+- name: Restart postfix and dovecot services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - postfix
+    - dovecot
+
+# Add users
+- name: Add users support1, dba, dev
+  user:
+    name: "{{ item }}"
+    password: '$6$oMv3FvEObVnXebhM$Wc76fAUnqs.a8vqzXAV6TtZTMiUqLA48dotpcP2yRloVBTpnSo3G3F.Arhc044BqqY/F.GDcu074cC29URTMu0'
+  with_items:
+    - promon
+    - grafana
+    - support1
+    - support2
+    - dba
+    - dev1
+    - dev2
+    - dev3
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

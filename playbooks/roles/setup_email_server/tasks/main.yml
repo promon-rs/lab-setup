@@ -1,0 +1,43 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Set SELinux to permissive
+- name: Set SELinux to permissive
+  selinux:
+    policy: targeted
+    state: permissive
+
+# Set up email server
+- name: Set email server
+  include_tasks: mail_server.yml
+  when: inventory_hostname == "srv1"
+
+# Set up webmail client
+- name: Set webmail client
+  include_tasks: webmail_client.yml
+  when: inventory_hostname == "srv2"
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

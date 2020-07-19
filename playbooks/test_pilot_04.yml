@@ -1,0 +1,6 @@
+---
+- name: Test flight 04
+  hosts: all
+  become: yes
+  roles:
+    - setup_docker

@@ -1,0 +1,61 @@
+# my global config
+global:
+  scrape_interval:     30s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 30s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - "alertmanager.{{ zone_name }}:9093"
+      # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['prometheus.{{ zone_name }}:9090']
+
+  - job_name: 'linux'
+    static_configs:
+    - targets:
+      - "srv1.{{ zone_name }}:9100"
+      - "srv1.{{ zone_name }}:9256"
+      - "srv2.{{ zone_name }}:9100"
+      - "srv2.{{ zone_name }}:9256"
+      - "monitor.{{ zone_name }}:9100"
+      - "monitor.{{ zone_name }}:9256"
+
+  - job_name: 'docker'
+    static_configs:
+    - targets:
+      - "srv1.{{ zone_name }}:9323"
+      - "srv2.{{ zone_name }}:9323"
+      - "monitor.{{ zone_name }}:9323"
+
+  - job_name: 'cAdvisor'
+    static_configs:
+    - targets:
+      - "srv1.{{ zone_name }}:8080"
+      - "srv2.{{ zone_name }}:8080"
+      - "monitor.{{ zone_name }}:8080"
+
+  - job_name: 'stress_generator'
+    static_configs:
+    - targets:
+      - "srv1.{{ zone_name }}:9098"
+      - "srv2.{{ zone_name }}:9098"
+      - "monitor.{{ zone_name }}:9098"

@@ -1,0 +1,27 @@
+---
+- name: Test flight 03
+  hosts: monitor
+  become: yes
+  roles:
+    - setup_dns
+
+- name: Test flight 031
+  hosts: all
+  become: yes
+  tasks:
+  - name: Setting /etc/resolv.conf part1
+    lineinfile:
+      path: /etc/resolv.conf
+      regexp: '^search'
+      line: "search {{ zone_name }}"
+      owner: root
+      group: root
+      mode: '0644'
+  - name: Setting /etc/resolv.conf part2
+    lineinfile:
+      path: /etc/resolv.conf
+      regexp: '^nameserver'
+      line: "nameserver {{ monitor_ip }}"
+      owner: root
+      group: root
+      mode: '0644'

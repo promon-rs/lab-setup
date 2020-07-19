@@ -1,0 +1,36 @@
+#########################################################################
+# Variables for role are defined here, at least they should be.
+#
+# We will describe variables here, but just for documentation purposes.
+# We will write a name and value example, just to get idea what it should
+# represent, but it will be commented. As said, purpose of this is just
+# documentation.
+#
+# Effective variables will be stored in group_vars folder.
+#########################################################################
+
+#repos_to_add:
+#  - https://download.docker.com/linux/centos/docker-ce.repo
+
+#yum_packages_to_install:
+#  - name: epel-release
+#    state: present
+#  - name: stress
+#    local: true
+#    url: https://centos.pkgs.org/8/getpagespeed-x86_64/stress-1.0.4-23.el8.x86_64.rpm.html
+#  - name: yum-utils
+#    state: present
+#  - name: device-mapper-persistent-data
+#    state: present
+#  - name: lvm2
+#    state: present
+#  - name: containerd.io
+#    state: present
+#  - name: docker-ce-3:18.09.1-3.el7
+#    state: present
+#    svc:
+#      name: docker
+#      enabled: yes
+#      svc_state: started
+#  - name: docker-ce-cli
+#    state: present

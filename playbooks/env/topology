@@ -1,0 +1,6 @@
+# BEGIN ANSIBLE MANAGED BLOCK
+[all]
+srv1 ansible_host=192.168.100.21 last_octet=21
+srv2 ansible_host=192.168.100.22 last_octet=22
+monitor ansible_host=192.168.100.25 last_octet=25 zone_name=promon.local subnet_root=192.168.100 subnet_root_inverted=100.168.192
+# END ANSIBLE MANAGED BLOCK

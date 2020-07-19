@@ -1,0 +1,7 @@
+apiVersion: 1
+
+datasources:
+  - name: Promon prometheus
+    type: prometheus
+    access: server
+    url: http://prometheus.{{ zone_name }}:9090

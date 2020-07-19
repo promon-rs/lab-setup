@@ -1,0 +1,12 @@
+#########################################################################
+# Variables for role are defined here, at least they should be.
+#
+# We will describe variables here, but just for documentation purposes.
+# We will write a name and value example, just to get idea what it should
+# represent, but it will be commented. As said, purpose of this is just
+# documentation.
+#
+# Effective variables will be stored in group_vars folder.
+#########################################################################
+
+# nothing

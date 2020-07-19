@@ -1,0 +1,28 @@
+$TTL 86400
+@       IN      SOA     monitor.{{ zone_name }}. root.{{ zone_name }}. (
+                                                1       ;Serial
+                                                3600    ;Refresh
+                                                1800    ;Retry
+                                                604800  ;Expire
+                                                86400   ;Minimum TTL
+)
+
+;Name Server Information
+@       IN      NS      monitor.{{ zone_name }}.
+
+;IP Address of Name Server
+monitor IN      A       {{ monitor_ip }}
+
+;Mail exchanger
+srv1.{{ zone_name }}.        IN      MX      10      mail.{{ zone_name }}.
+
+;A - Record hostname to IP Address
+srv1    IN      A       {{ srv1_ip }}
+srv2    IN      A       {{ srv2_ip }}
+
+;CNAME records
+mail    IN      CNAME   srv1.{{ zone_name }}.
+webmail IN      CNAME   srv2.{{ zone_name }}.
+grafana IN      CNAME   monitor.{{ zone_name }}.
+prometheus      IN      CNAME   monitor.{{ zone_name }}.
+alertmanager    IN      CNAME   monitor.{{ zone_name }}.

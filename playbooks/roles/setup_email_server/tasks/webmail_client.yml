@@ -1,0 +1,50 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Setting access rights - directories
+- name: Setting access rights - directories
+  shell: sudo find /tmp/rainloop/. -type d -exec chmod 755 {} \;
+
+# Setting access rights - directories
+- name: Setting access rights - files
+  shell: sudo find /tmp/rainloop/. -type f -exec chmod 644 {} \;
+
+# Setting access rights for rainloop/data
+- name: Setting access rights for rainloop/data
+  shell: sudo chmod 0777 /tmp/rainloop/data/
+
+# Initialize webmail server
+- name: Initialize webmail server
+  shell: "curl webmail.{{ zone_name }}"
+
+# Template domain.ini file for zone_name
+- name: Template domain.ini file for {{ zone_name }}
+  template:
+    src: zone_name.ini.j2
+    dest: "/tmp/rainloop/data/_data_/_default_/domains/{{ zone_name }}.ini"
+    mode: '0644'
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

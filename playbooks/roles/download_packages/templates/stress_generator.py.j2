@@ -1,0 +1,83 @@
+import logging, os, random, subprocess, time
+from prometheus_client import Gauge, start_http_server
+
+logging.basicConfig(filename="/var/log/stress_generator.log", level=logging.DEBUG)
+tests = ['-i 1 ', '-m 3 ', '-d 1 ']
+sg_number_of_tests = Gauge('stress_test_current_number_of_tests','Current number of stress tests running')
+sg_sleep_timeout = Gauge('stress_test_current_sleep_timeout','Current sleep timeout in seconds')
+sg_running_timeout = Gauge('stress_test_running_timeout','Current running timeout in seconds. Timeout for which tests are run.')
+sg_running_tests = Gauge('stress_test_running_tests','1 representing some tests are running, 0 representing there are no tests running')
+sg_cpu_test_running = Gauge('stress_test_cpu_test','0 representing test is not running currently, 1 representing test is running currently')
+sg_memory_test_running = Gauge('stress_memory_cpu_test','0 representing test is not running currently, 1 representing test is running currently')
+sg_io_test_running = Gauge('stress_test_io_test','0 representing test is not running currently, 1 representing test is running currently')
+sg_hdd_test_running = Gauge('stress_test_hdd_test','0 representing test is not running currently, 1 representing test is running currently')
+
+def choose_tests():
+    temp_tests = tests.copy()
+    number_of_tests = random.randint(0,3)       # 0 for "pause"
+    sg_number_of_tests.set(number_of_tests)
+
+    if number_of_tests == 0:
+        return []
+    else:
+        final_tests_array = []
+        for i in range(0, number_of_tests):
+            temp_test_number = random.randint(0, len(temp_tests) - 1)
+            final_tests_array.append(temp_tests[temp_test_number])
+            temp_tests.pop(temp_test_number)
+
+        return final_tests_array
+
+def main():
+    sg_running_tests.set(0)                              # clear all gauges
+    sg_cpu_test_running.set(0)
+    sg_io_test_running.set(0)
+    sg_memory_test_running.set(0)
+    sg_hdd_test_running.set(0)
+
+    stress_command_switches = choose_tests()
+    sleep_timeout = random.randint(30, 300)         # number in seconds, 30s min, 5min max
+    sg_sleep_timeout.set(sleep_timeout)
+
+    if len(stress_command_switches) == 0:
+        sg_running_tests.set(1)
+        logging.info("This time we have no tests.")
+    else:
+        stressing_for = random.randint(15, 300)     # number in seconds, 15s min, 5min max
+
+        sg_running_timeout.set(stressing_for)
+        
+        stress_command = "stress "
+        tests = ['-i 1 ', '-m 3 ', '-d 1 ']
+        for stress_switch in stress_command_switches:
+            if stress_switch == '-c 2 ':
+                sg_cpu_test_running.set(1)
+            elif stress_switch == '-i 2 ':
+                sg_io_test_running.set(1)
+            elif stress_switch == '-m 3 ':
+                sg_memory_test_running.set(1)
+            elif stress_switch == '-d 1 ':
+                sg_hdd_test_running.set(1)
+            
+            stress_command += stress_switch
+
+        stress_command += f"--timeout { str(stressing_for) }"
+        logging.info("Stress command for this run is: {}".format(stress_command))
+
+        stress_command_output = os.system(stress_command)
+        if stress_command_output == 0:
+            #print(f"{ stress_command } ===> uspesno izvrseno")
+            logging.info("Stress command run successfully.")
+        else:
+            #print(f"{ stress_command } ===> nije izvrseno, nesto se zbingalo")
+            logging.info("Stress command failed.")
+
+    logging.info("Sleeping for {}".format(sleep_timeout))
+    time.sleep(sleep_timeout)
+
+if __name__ == "__main__":
+    start_http_server(9098)
+    logging.info("HTTP Server started on port 9098.")
+    
+    while True:
+        main()

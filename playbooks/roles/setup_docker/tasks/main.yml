@@ -1,0 +1,121 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# Check if docker-compose is already installed
+- name: Check if symbolic link to /usr/bin/docker-compose exists
+  stat:
+    path: /usr/bin/docker-compose
+  register: docker_compose_link
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Install docker-compose
+# Download docker-compose to /usr/local/bin/docker-compose
+- name: Download docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.25.4/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+  when: docker_compose_link.stat.islnk is not defined
+
+# Apply executable permissions to the docker-compose binary
+- name: Apply executable permissions to the docker-compose binary
+  file:
+    path: /usr/local/bin/docker-compose
+    mode: u+rwx,g+rwx,o+rwx
+  when: docker_compose_link.stat.islnk is not defined
+
+# Create symbolic link to /usr/bin/docker-compose
+- name: Create symbolic link to /usr/bin/docker-compose
+  shell: sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+  when: docker_compose_link.stat.islnk is not defined
+
+# Template docker daemon.json for prometheus metrics
+- name: Set daemon.json
+  template:
+    src: "daemon.json.j2"
+    dest: /etc/docker/daemon.json
+
+# Template prometheus.yml
+- name: Template prometheus.yml
+  template:
+    src: "prometheus.yml.j2"
+    dest: /tmp/prometheus.yml
+  when: inventory_hostname == "monitor"
+
+# Template nginx default.conf
+- name: Template docker-compose.yml
+  template:
+    src: "nginx.conf.j2"
+    dest: /tmp/nginx.conf
+
+# Template grafana.ini
+- name: Template grafana.ini
+  template:
+    src: "grafana.ini.j2"
+    dest: /tmp/grafana.ini
+  when: inventory_hostname == "monitor"
+
+# Template prometheus_datasource.yml
+- name: Template prometheus_datasource.yml
+  template:
+    src: "prometheus_datasource.yml.j2"
+    dest: /tmp/prometheus_datasource.yml
+  when: inventory_hostname == "monitor"
+
+# Template dashboards_provisioning.yml
+- name: Template dashboards_provisioning.yml
+  template:
+    src: "dashboards_provisioning.yml.j2"
+    dest: /tmp/dashboards_provisioning.yml
+  when: inventory_hostname == "monitor"
+
+# Template node_exporter_dashboard.json
+- name: Template node_exporter_dashboard.json
+  template:
+    src: "node_exporter_dashboard.json.j2"
+    dest: /tmp/node_exporter_dashboard.json
+  when: inventory_hostname == "monitor"
+
+# Template process_exporter_dashboard.json
+- name: Template process_exporter_dashboard.json
+  template:
+    src: "process_exporter_dashboard.json.j2"
+    dest: /tmp/process_exporter_dashboard.json
+  when: inventory_hostname == "monitor"
+
+# Template docker-compose.yml
+- name: Template docker-compose.yml
+  template:
+    src: "docker-compose.yml.j2"
+    dest: /tmp/docker-compose.yml
+
+# Restart docker service
+- name: Restart Docker service
+  service:
+    name: docker
+    state: restarted
+
+# Run docker compose
+- name: Run docker compose
+  shell: docker-compose -f /tmp/docker-compose.yml up -d
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

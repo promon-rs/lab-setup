@@ -1,0 +1,38 @@
+#########################################################################
+# Variables for role are defined here, at least they should be.
+#
+# We will describe variables here, but just for documentation purposes.
+# We will write a name and value example, just to get idea what it should
+# represent, but it will be commented. As said, purpose of this is just
+# documentation.
+#
+# Effective variables will be stored in group_vars folder.
+#########################################################################
+
+#### Lines to be entered with lineinfile module
+####
+###lines_in_file:
+###  - file: /path/to/file1
+###    insert_after: if needed
+###    insert_before: if needed
+###    lines:
+###      - line1
+###      - line2
+###      - line3
+###      - line4
+###      - line5
+###  - file: /path/to/file2
+###    insert_after: if needed
+###    insert_before: if needed
+###    lines:
+###      - line1
+###      - line2
+###
+#### Blocks to be entered with blockinfile module
+####
+###blocks_in_file:
+###  - file: /path/to/file3
+###    insert_after: if needed
+###    insert_before: if needed
+###    block: |
+###      Block of text1

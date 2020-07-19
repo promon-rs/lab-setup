@@ -1,0 +1,39 @@
+{% for svc in docker_svcs %}
+{% if svc.name in ['alertmanager','grafana','prometheus','cadvisor'] %}
+server {
+        listen 80;
+{% if svc.name == 'cadvisor' %}
+        server_name {{ inventory_hostname }}.{{ zone_name }};
+{% else %}
+        server_name {{ svc.name }}.{{ zone_name }};
+{% endif %}
+        location / {
+                proxy_pass http://{{ svc.name }}:{% if svc.name == 'alertmanager'%}9093{% elif svc.name == 'grafana' %}3000{% elif svc.name == 'prometheus' %}9090{% elif svc.name == 'cadvisor' %}8080{% endif %};
+        }
+}
+
+{% elif svc.name in ['webmail'] %}
+server {
+    listen 80;
+    index index.php index.html;
+    server_name {{ svc.name }}.{{ zone_name }};
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+    root /var/www/rainloop;
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass {{ inventory_hostname }}.{{ zone_name }}:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+
+    location ^~ /data {
+      deny all;
+    }
+}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,6 @@
+---
+- name: Test flight 05
+  hosts: srv1,srv2
+  become: yes
+  roles:
+    - setup_email_server

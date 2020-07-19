@@ -1,0 +1,114 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# to_write, type - are from main.yml
+#- name: blah01
+#  debug:
+#    msg: "{{ to_write.file }}"
+
+#- name: blah02
+#  debug:
+#    msg: "{{ type }}"
+
+#- name: blah03
+#  debug:
+#    msg: "{{ to_write.lines }}"
+
+#- name: blah04
+#  debug:
+#    msg: "{{ to_write.file }} -> {{ temp_line }}"
+#  with_items: "{{ to_write.lines }}"
+#  loop_control:
+#    loop_var: temp_line
+
+#- name: blah05
+#  debug:
+#    msg: "^{{ temp_line.split(' = ')[0] }}"
+#  with_items: "{{ to_write.lines }}"
+#  loop_control:
+#    loop_var: temp_line
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Write to the file
+- name: Write line(s) in file - default
+  lineinfile:
+    path: "{{ to_write.file }}"
+    line: "{{ temp_line }}"
+    regexp: "^{{ temp_line.split('=')[0] }}"
+    state: present
+  with_items: "{{ to_write.lines }}"
+  when: to_write.insert_after is not defined and to_write.insert_before is not defined and type == "line"
+  loop_control:
+    loop_var: temp_line
+
+- name: Write line(s) in file - insert after
+  lineinfile:
+    path: "{{ to_write.file }}"
+    insertafter: "{{ to_write.insert_after }}"
+    line: "{{ temp_line }}"
+  with_items: '{{ to_write.lines }}'
+  when: to_write.insert_after is defined and type == "line"
+  loop_control:
+    loop_var: temp_line
+
+- name: Write line(s) in file - insert before
+  lineinfile:
+    path: "{{ to_write.file }}"
+    insertbefore: "{{ to_write.insert_before }}"
+    line: "{{ temp_line }}"
+  with_items: "{{ to_write.lines }}"
+  when: to_write.insert_before is defined and type == "line"
+  loop_control:
+    loop_var: temp_line
+
+- name: Write block(s) in file - default
+  lineinfile:
+    path: "{{ to_write.file }}"
+    line: "{{ temp_block }}"
+  with_items: "{{ to_write.block }}"
+  when: to_write.insert_after is not defined and to_write.insert_before is not defined and type == "block"
+  loop_control:
+    loop_var: temp_block
+  
+
+- name: Write block(s) in file - insert after
+  lineinfile:
+    path: "{{ to_write.file }}"
+    insertafter: "{{ to_write.insert_after }}"
+    line: "{{ temp_block }}"
+  with_items: "{{ to_write.block }}"
+  when: to_write.insert_after is defined and type == "block"
+  loop_control:
+    loop_var: temp_block
+
+- name: Write block(s) in file - insert before
+  lineinfile:
+    path: "{{ to_write.file }}"
+    insertbefore: "{{ to_write.insert_before }}"
+    line: "{{ temp_block }}"
+  with_items: "{{ to_write.block }}"
+  when: to_write.insert_before is defined and type == "block"
+  loop_control:
+    loop_var: temp_block
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

@@ -1,0 +1,46 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# Add repos
+- name: Add repository
+  shell: yum-config-manager --add-repo "{{ item }}"
+  with_items: "{{ repos_to_add }}"
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Install, uninstall (or whatever status) package
+- name: Install yum package
+  yum:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  with_items: "{{ yum_packages_to_install }}"
+
+# Enable and start service from installed packages
+- name: Enable and start service
+  service:
+    name: "{{ item.svc.name }}"
+    enabled: "{{ item.svc.enabled }}"
+    state: "{{ item.svc.svc_state }}"
+  with_items: "{{ yum_packages_to_install }}"
+  when: item.svc is defined
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

@@ -1,0 +1,58 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# nothing
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# Get stat of /home/vagrant/temp folder
+- name: Get stat of /home/vagrant/temp folder
+  stat:
+    path: /home/vagrant/temp
+  register: temp_folder
+  tags:
+    - download
+    - installAsService
+    - installSimple
+
+# Create /home/vagrant/temp folder
+- name: Create /home/vagrant/temp folder if it doesn't exist
+  file:
+    path: /home/vagrant/temp
+    state: directory
+    mode: '0755'
+  when: temp_folder.stat.exists == false
+  tags:
+    - download
+    - installAsService
+    - installSimple
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Download and unpack
+- name: Get item and send to proper playbook
+  include_tasks: download_and_unpack.yml
+  vars:
+    pkg: "{{ item }}"
+  with_items: "{{ packages_to_download }}"
+  tags:
+    - download
+    - installAsService
+    - installSimple
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

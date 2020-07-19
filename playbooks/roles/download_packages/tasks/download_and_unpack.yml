@@ -1,0 +1,141 @@
+#########################################################################
+# Defining variables
+#########################################################################
+
+# pkg is comming from main.yml, it represents one packages_to_download item
+
+
+
+#########################################################################
+# Prepare steps
+#########################################################################
+
+# Get stat of {{ svc_binary_location }}/{{ pkg.svc_name }} folder
+- name: Get stat of destination {{ svc_binary_location }}/{{ pkg.svc_name }} folder
+  stat:
+    path: "{{ svc_binary_location }}/{{ pkg.svc_name }}"
+  register: new_folder
+  when: pkg.svc_binary is defined
+  tags:
+    - installAsService
+
+# Create {{ svc_binary_location }}/{{ pkg.svc_name }} folder
+- name: Create {{ svc_binary_location }}/{{ pkg.svc_name }} folder if it doesn't exist
+  file:
+    path: "{{ svc_binary_location }}/{{ pkg.svc_name }}"
+    state: directory
+  when: pkg.svc_binary is defined and new_folder.stat.exists == false
+  tags:
+    - installAsService
+
+# Template {{ pkg.svc_name }}.service file
+- name: Template {{ pkg.svc_name }}.service file
+  template:
+    src: "default_unit.service.j2"
+    dest: "{{ svc_unit_location }}/{{ pkg.svc_name }}.service"
+  when: pkg.svc_binary is defined
+  tags:
+    - installAsService
+
+# Get stat of /tmp/{{ pkg.svc_name }} folder - if zip package
+- name: Get stat of /tmp/{{ pkg.svc_name }} folder - if zip package
+  stat:
+    path: "/tmp/{{ pkg.svc_name }}"
+  register: new_zip_folder
+  when: pkg.pkg_ext == "zip"
+  tags:
+    - installSimple
+
+# Create /tmp/{{ pkg.svc_name }} folder - if zip package
+- name: Create /tmp/{{ pkg.svc_name }} folder - if zip package
+  file:
+    path: "/tmp/{{ pkg.svc_name }}"
+    state: directory
+  when: pkg.pkg_ext == "zip" and new_zip_folder.stat.exists == false
+  tags:
+    - installSimple
+
+
+
+#########################################################################
+# Now, do the magic!
+#########################################################################
+
+# Download package
+- name: Download package
+  get_url:
+    url: "{{ pkg.pkg_url }}"
+    dest: "{{ pkg_dest }}/{{ pkg.svc_name }}.{{ pkg.pkg_ext }}"
+  when: pkg.pkg_url is defined
+  tags:
+    - download
+
+# Unarchive package
+- name: Unarchive package
+  shell: tar xzvf "{{ pkg_dest }}/{{ pkg.svc_name }}.{{ pkg.pkg_ext }}" -C "{{ svc_binary_location }}/{{ pkg.svc_name }}" --strip-components=1 --no-same-owner
+  when: pkg.svc_binary is defined and pkg.pkg_ext == "tar.gz"
+  tags:
+    - installAsService
+    
+# Yum install from local storage
+- name: Yum install from local storage
+  yum:
+    name: "{{ pkg_dest }}/{{ pkg.svc_name }}.{{ pkg.pkg_ext }}"
+    state: present
+  when: pkg.pkg_ext == "rpm"
+  tags:
+    - installSimple
+
+# Unzip package from local storage
+- name: Unzip package from local storage
+  shell: "unzip {{ pkg_dest }}/{{ pkg.svc_name }}.{{ pkg.pkg_ext }} -d /tmp/{{ pkg.svc_name }}"
+  when: pkg.pkg_ext == "zip"
+  tags:
+    - installSimple
+
+# Template python scripts
+- name: Template python scripts
+  template:
+    src: "{{ pkg.svc_name }}.py.j2"
+    dest: "{{ svc_binary_location }}/{{ pkg.svc_name }}/{{ pkg.svc_name }}.py"
+  when: pkg.svc_binary is defined and pkg.pkg_ext == "py"
+  tags:
+    - installAsService
+
+# Template service config file - if exists
+- name: Template {{ pkg.svc_config }} file
+  template:
+    src: "{{ pkg.svc_config }}.j2"
+    dest: "{{ svc_binary_location }}/{{ pkg.svc_name }}/{{ pkg.svc_config }}"
+  when: pkg.svc_binary is defined and pkg.svc_config is defined
+  tags:
+    - installAsService
+
+# Enable service
+- name: Enable {{ pkg.svc_name }} service
+  shell: systemctl enable {{ pkg.svc_name }}
+  when: pkg.svc_binary is defined
+  tags:
+    - installAsService
+
+# daemon reload
+- name: Daemon reload
+  shell: systemctl daemon-reload
+  when: pkg.svc_binary is defined
+  tags:
+    - installAsService
+
+# Start service
+- name: Start {{ pkg.svc_name }} service
+  shell: systemctl start {{ pkg.svc_name }}
+  when: pkg.svc_binary is defined
+  tags:
+    - installAsService
+
+
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# nothing

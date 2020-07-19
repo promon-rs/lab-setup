@@ -1,0 +1,25 @@
+#########################################################################
+# Variables for role are defined here, at least they should be.
+#
+# We will describe variables here, but just for documentation purposes.
+# We will write a name and value example, just to get idea what it should
+# represent, but it will be commented. As said, purpose of this is just
+# documentation.
+#
+# Effective variables will be stored in group_vars folder.
+#########################################################################
+
+#### IP Address of DNS server in our environment
+###zone_name: "{{ hostvars['monitor']['zone_name'] }}"
+###monitor_ip: "{{ hostvars['monitor']['ansible_host'] }}"
+###monitor_last_octet: "{{ hostvars['monitor']['last_octet'] }}"
+###srv1_ip: "{{ hostvars['srv1']['ansible_host'] }}"
+###srv1_last_octet: "{{ hostvars['srv1']['last_octet'] }}"
+###srv2_ip: "{{ hostvars['srv2']['ansible_host'] }}"
+###srv2_last_octet: "{{ hostvars['srv2']['last_octet'] }}"
+###subnet_root: "{{ hostvars['monitor']['subnet_root'] }}"
+###subnet_root_inverted: "{{ hostvars['monitor']['subnet_root_inverted'] }}"
+###
+######dns_ip: 192.168.100.13
+######subnet_root: 192.168.100
+######subnet_root_inverted: 100.168.192

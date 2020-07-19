@@ -1,0 +1,19 @@
+$TTL 86400
+@       IN      SOA     monitor.{{ zone_name }}. root.{{ zone_name }}. (
+                                                1       ;Serial
+                                                3600    ;Refresh
+                                                1800    ;Retry
+                                                604800  ;Expire
+                                                86400   ;Minimum TTL
+)
+
+;Name Server Information
+@       IN      NS      monitor.{{ zone_name }}.
+
+;Reverse lookup for Name Server
+{{ monitor_last_octet }}      IN      PTR     monitor.{{ zone_name }}.
+
+;A - Record hostname to IP Address
+{{ srv1_last_octet }}      IN      PTR     srv1.{{ zone_name }}.
+{{ srv1_last_octet }}      IN      PTR     mail.{{ zone_name }}.
+{{ srv2_last_octet }}      IN      PTR     srv2.{{ zone_name }}.

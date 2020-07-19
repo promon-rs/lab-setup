@@ -1,0 +1,44 @@
+---
+- name: Test flight 00
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+  - name: Ansible cfg altering
+    lineinfile:
+      path: /etc/ansible/ansible.cfg
+      regexp: '^#host_key_checking'
+      line: host_key_checking = False
+  - name: Read Vagrantfile
+    set_fact:
+      raw_vagrant_file: "{{lookup('file', '/vagrant/Vagrantfile') }}"
+  - name: Set temp variables
+    set_fact:
+      srv1_temp: "{{ raw_vagrant_file | regex_search('srv1.vm.network \"private_network\", ip: \"(.*)\"') }}"
+      srv2_temp: "{{ raw_vagrant_file | regex_search('srv2.vm.network \"private_network\", ip: \"(.*)\"') }}"
+      monitor_temp: "{{ raw_vagrant_file | regex_search('monitor.vm.network \"private_network\", ip: \"(.*)\"') }}"
+      zone_temp: "{{ raw_vagrant_file | regex_search('monitor.vm.hostname = \"monitor.(.*)\"') }}"
+  - name: Extract real variables
+    set_fact:
+      srv1_ip: "{{ srv1_temp | regex_replace('.*ip: \"(.*)\"', '\\1') }}"
+      srv1_last_octet: "{{ srv1_temp | regex_replace('.*ip: \"(\\d+\\.){3}(.*)\"', '\\2') }}"
+      srv2_ip: "{{ srv2_temp | regex_replace('.*ip: \"(.*)\"', '\\1') }}"
+      srv2_last_octet: "{{ srv2_temp | regex_replace('.*ip: \"(\\d+\\.){3}(.*)\"', '\\2') }}"
+      monitor_ip: "{{ monitor_temp | regex_replace('.*ip: \"(.*)\"', '\\1') }}"
+      monitor_last_octet: "{{ monitor_temp | regex_replace('.*ip: \"(\\d+\\.){3}(.*)\"', '\\2') }}"
+      zone_name: "{{ zone_temp | regex_replace('.* = \"monitor.(.*)\"','\\1') }}"
+      subnet_root: "{{ monitor_temp | regex_replace('.*ip: \"((\\d+\\.){2}\\d+).*\"', '\\1') }}"
+      subnet_root_inverted: "{{ monitor_temp | regex_replace('.*ip: \"(\\d+).(\\d+).(\\d+).*\"', '\\3.\\2.\\1') }}"
+  - name: Touch topology file
+    file:
+      path: /vagrant/playbooks/env/topology
+      state: touch
+      mode: '0755'
+  - name: Populate topology file
+    blockinfile:
+      path: /vagrant/playbooks/env/topology
+      block: |
+        [all]
+        srv1 ansible_host={{ srv1_ip }} last_octet={{ srv1_last_octet }}
+        srv2 ansible_host={{ srv2_ip }} last_octet={{ srv2_last_octet }}
+        monitor ansible_host={{ monitor_ip }} last_octet={{ monitor_last_octet }} zone_name={{ zone_name }} subnet_root={{ subnet_root }} subnet_root_inverted={{ subnet_root_inverted }}

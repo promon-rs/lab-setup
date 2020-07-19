@@ -1,0 +1,6 @@
+---
+- name: Test flight 01
+  hosts: all
+  become: yes
+  roles:
+    - yum_install

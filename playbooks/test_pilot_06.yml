@@ -1,0 +1,65 @@
+---
+- name: Test flight 061
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+  - name: Send e-mail
+    mail:
+      host: "mail.{{ zone_name }}"
+      port: 587
+      username: "vagrant@{{ zone_name }}"
+      password: vagrant
+      from: "vagrant@{{ zone_name }}"
+      to:
+      - "promon@{{ zone_name }}"
+      subject: Ansible-report
+      subtype: html
+      body: '
+        <h1>Dobrodosli!</h1>
+        
+        <p>Ovo je poslednji korak u podesavanju okruzenja koje cemo koristiti kao "laboratoriju".</p>
+        
+        <p>Korisni linkovi:
+        <h3>Servisi</h3>
+        <ul>
+        <li>http://grafana.{{ zone_name }}</li>
+        <li>http://prometheus.{{ zone_name }}</li>
+        <li>http://alertmanager.{{ zone_name }}</li>
+        <li>http://webmail.{{ zone_name }}</li>
+        <li>http://srv1.{{ zone_name }}   (cAdvisor)</li>
+        <li>http://srv2.{{ zone_name }}   (cAdvisor)</li>
+        <li>http://monitor.{{ zone_name }}   (cAdvisor)</li>
+        </ul>
+        
+        <h3>Exporteri</h3>
+        <ul>
+        <li>http://srv1.{{ zone_name }}:9100/metrics  (node_exporter)</li>
+        <li>http://srv1.{{ zone_name }}:9256/metrics  (process_exporter)</li>
+        <li>http://srv1.{{ zone_name }}:9323/metrics  (native docker metrics)</li>
+        <li>http://srv1.{{ zone_name }}/metrics  (cAdvisor metrics)</li>
+        <li>http://srv1.{{ zone_name }}:9098/metrics  (stress generator metrics)</li>
+        <li>http://srv2.{{ zone_name }}:9100/metrics  (node_exporter)</li>
+        <li>http://srv2.{{ zone_name }}:9256/metrics  (process_exporter)</li>
+        <li>http://srv2.{{ zone_name }}:9323/metrics  (native docker metrics)</li>
+        <li>http://srv2.{{ zone_name }}/metrics  (cAdvisor metrics)</li>
+        <li>http://srv2.{{ zone_name }}:9098/metrics  (stress generator metrics)</li>
+        <li>http://monitor.{{ zone_name }}:9100/metrics  (node_exporter)</li>
+        <li>http://monitor.{{ zone_name }}:9256/metrics  (process_exporter)</li>
+        <li>http://monitor.{{ zone_name }}:9323/metrics  (native docker metrics)</li>
+        <li>http://monitor.{{ zone_name }}/metrics  (cAdvisor metrics)</li>
+        <li>http://monitor.{{ zone_name }}:9098/metrics  (stress generator metrics)</li>
+        </ul>
+        
+        Pozdrav</p>
+        '
+
+
+- name: Test flight 062
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install prometheus python client
+      pip:
+        name: prometheus_client
+

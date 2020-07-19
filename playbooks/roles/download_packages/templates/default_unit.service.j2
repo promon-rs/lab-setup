@@ -1,0 +1,10 @@
+[Unit]
+Description={{ pkg.svc_name }}
+           
+[Service]
+ExecStart={% if pkg.pkg_ext == "py" %}/usr/bin/python3 {% endif %}{{ svc_binary_location }}/{{ pkg.svc_name }}/{{ pkg.svc_binary }} {% if pkg.svc_config is defined %} -config.path {{ svc_binary_location }}/{{ pkg.svc_name }}/{{ pkg.svc_config }} {% endif %}
+
+Restart=on-failure
+           
+[Install]
+WantedBy=default.target
